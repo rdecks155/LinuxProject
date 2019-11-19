@@ -1,0 +1,158 @@
+#!/bin/bash
+#AUTHOR: ROBBIE DECKER
+if [ ! -d "todo?" ]
+then
+	mkdir todo?
+	chmod 600 /todo?
+fi
+if [ ! -d "todo.completed?" ]
+then
+	mkdir todo.completed?	
+	chmod 600 /todo.completed?
+fi
+if [ -z "$1" ]
+then
+while true
+do
+COUNT=$(ls ./todo? | wc -l)
+	echo "-----------------------------------------------"
+	echo "Welcome! Here are your current to-do items."
+	echo
+	if [ -f './todo?/1' ]
+	then
+		for i in $(seq 1 $COUNT) 
+		do	
+			echo "$i) $(head -n 1 ./todo?/$i)"
+		done
+	fi
+	echo
+	echo "What would you like to do?"
+	if [ $COUNT -ge 2 ]
+	then	
+	echo "1-$COUNT) See more information on these items."
+	else	
+	echo "1) See more information on this item."
+	fi
+	echo "A) Mark an item as completed."
+	echo "B) Add a new item."
+	echo "C) See completed items"
+	echo 
+	echo "Q) Quit"
+	echo 
+	read -p "Command: " OPERATION
+
+	#a For loop that goes through files in 'todo?' and returns a 1 for if that file exists in the list and assign a value for that number to use inside the switch.
+	for id in $(seq 1 $COUNT)
+		do
+			echo 
+			if [ $OPERATION == $id ]
+			then F
+				echo "$id) $(cat ./todo?/$id)"
+				echo
+				OPERATION=1
+			fi
+		done
+	case "$OPERATION" in
+		[1])
+			
+		;;
+		[aA])
+			read -p "What number task did you finish?" DONE
+			FINISHED=$(ls ./todo.completed? | wc -l)
+			mv ./todo?/$DONE ./todo.completed?/$(($FINISHED+1))
+			((FINISHED++))
+			J=$DONE
+			for i in $(seq $(($DONE+1)) $COUNT)
+				do
+					mv ./todo?/$i ./todo?/$J
+					J=$i
+				done
+		;;
+		[bB])
+			echo "Add a new line by pressing enter!"
+			echo "Press Enter with nothing in the field to finish adding to the item"
+			read -p "What's your new Task? " TASK
+			while [ "$TASK" != "" ]
+			do 
+				echo "$TASK" >> ./todo?/$(($COUNT+1))
+				chmod 600 ./todo?/$(($COUNT+1))
+				read -p "What else would like to add about the task? " TASK
+			done
+			echo "Added new Item"
+		;;
+		[cC])
+			echo "Here are the completed Items"
+			for i in $(seq 1 $FINISHED)
+			do
+				echo "$i) $(cat ./todo.completed?/$i)"
+			done
+		;;
+		[qQ] | [qQ][uU][iI][tT])
+
+			echo "Exiting to-do list..."
+			break
+		;;
+		*)
+			echo "Sorry I dont know that command :("
+		;;
+
+	esac
+done
+echo "Have a good day!"
+else
+	COUNT=$(ls ./todo? | wc -l)
+	FINISHED=$(ls ./todo.completed? | wc -l)
+	#Help function
+	if [ "$1" == "help" ]
+	then
+		echo "help: Shows list of all available functions."
+		echo "list: Numbered list of uncompleted tasks"
+		echo "complete #: function to complete a given task."
+		echo "list completed: Lists all tasks marked as completed."
+		echo "add 'title': creates a new todo item where 'title' is the title of the task."
+		echo "To use the menu interface you can run the todo program with no parameters."
+
+	#List function
+	elif [ "$1" == "list" ]
+	then 
+		#List completed function
+		if [ "$2" == "completed" ]
+		then
+			for id in $(seq 1 $FINISHED)
+			do 
+				echo "$id) $(head -n 1 ./todo.completed?/$id)"
+			done
+
+		else
+			for id in $(seq 1 $COUNT)
+			do
+				echo "$id) $(head -n 1 ./todo?/$id)"
+			done
+		fi
+	#Add function
+	elif [ "$1" ==	"add" ]
+	then
+		TASK=$2
+		while [ "$TASK" != "" ]
+		do
+			echo "$TASK" >> ./todo?/$(($COUNT+1))
+			chmod 600 ./todo?/$(($COUNT+1))
+			read -p "What else would you like to add about task? If nothing just press 'ENTER'" TASK
+		done
+	elif [ "$1" == "complete" ] 
+	then 
+		mv ./todo?/$2 ./todo.completed?/$(($FINISHED+1))
+		chmod 600 ./todo.completed?/$((FINISHED+1))
+		((FINISHED++))
+		J=$2
+		for id in $(seq $(($2+1)) $COUNT)
+		do
+			mv ./todo?/$id ./todo?/$J
+			J=$id
+		done
+	else
+		echo "Sorry I dont know that command :("
+	fi
+
+
+fi
